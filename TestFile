@@ -1,1 +1,153 @@
 Test FIle Checking
+To create a PDF with the format similar to the image provided using the PDFBox library in Java, follow these steps:
+
+Steps:
+
+1. Include Apache PDFBox dependency in your project (use Maven or Gradle).
+
+
+2. Create a new PDF document using PDFBox.
+
+
+3. Add text content (lines) to the top of the document.
+
+
+4. Convert the byte array (received from the external system) into an image.
+
+
+5. Draw the image below the text, maintaining the alignment.
+
+
+6. Save the PDF file to the desired location.
+
+
+
+Here's an example Java code:
+
+Maven Dependency
+
+Add this to your pom.xml:
+
+<dependency>
+    <groupId>org.apache.pdfbox</groupId>
+    <artifactId>pdfbox</artifactId>
+    <version>2.0.29</version>
+</dependency>
+
+Java Code
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class PdfWithImage {
+    public static void main(String[] args) {
+        try {
+            // Sample byte array (Replace this with your actual byte array response)
+            byte[] imageBytes = Files.readAllBytes(Path.of("path/to/image/file.jpg")); // Replace with actual byteArray
+            
+            // Create a new PDF document
+            PDDocument document = new PDDocument();
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            // Content stream for writing to the page
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            // Add text content
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.beginText();
+            contentStream.setLeading(14.5f); // Line spacing
+            contentStream.newLineAtOffset(50, 700); // Starting position
+
+            // Add each line
+            contentStream.showText("UPS Electronic Return Label: View/Print Label");
+            contentStream.newLine();
+            contentStream.showText("1. Ensure that there are no other tracking labels attached to your shipment.");
+            contentStream.newLine();
+            contentStream.showText("2. Fold the printed label at the dotted line.");
+            contentStream.newLine();
+            contentStream.showText("3. Collection and Drop-off");
+            contentStream.newLine();
+            contentStream.showText("Take this parcel to any location of The UPS Store or UPS Drop Box.");
+            contentStream.endText();
+
+            // Add image below the text
+            ByteArrayInputStream imageInputStream = new ByteArrayInputStream(imageBytes);
+            PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, imageBytes, "UPS Label");
+            contentStream.drawImage(pdImage, 50, 400, pdImage.getWidth() * 0.5f, pdImage.getHeight() * 0.5f); // Resize image to 50%
+
+            // Close the content stream
+            contentStream.close();
+
+            // Save the document
+            document.save(new FileOutputStream("output.pdf"));
+            document.close();
+
+            System.out.println("PDF created successfully!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+Explanation:
+
+1. Text Content:
+
+Use beginText() and showText() to add the text.
+
+Positioning and line spacing are handled with newLineAtOffset() and setLeading().
+
+
+
+2. Image Handling:
+
+Convert your byte array (imageBytes) to a PDImageXObject.
+
+Place the image on the page using drawImage() with proper scaling and position.
+
+
+
+3. Positioning:
+
+The text starts at the top of the page (around 700 points down).
+
+The image is positioned below the text (starting at 400 points down).
+
+
+
+4. Image ByteArray:
+
+Replace path/to/image/file.jpg with your actual byte array input from the external system.
+
+
+
+5. Save Output:
+
+The generated PDF will be saved as output.pdf in the working directory.
+
+
+
+
+Result
+
+The generated PDF will have:
+
+1. Text at the top, formatted as per your content.
+
+
+2. The image (from the byte array) placed below the text, properly aligned.
+
+
+
+Let me know if you need further assistance!
+
